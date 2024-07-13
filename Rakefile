@@ -9,6 +9,7 @@ require './lib/opencv/psyched_yaml'
 require 'yard'
 require 'yard/rake/yardoc_task'
 require './yard_extension'
+require 'tmpdir'
 
 SO_FILE = 'opencv.so'
 
@@ -17,6 +18,7 @@ Hoe.plugin :gemspec
 hoespec = Hoe.spec 'ruby-opencv' do |s|
   s.summary = 'OpenCV wrapper for Ruby'
   s.description = 'ruby-opencv is a wrapper of OpenCV for Ruby. It helps you to write computer vision programs (e.g. detecting faces from pictures) with Ruby.'
+  s.homepage = "https://github.com/ruby-opencv/ruby-opencv/".freeze
   s.licenses = ['BSD-3-Clause']
   s.developer('lsxi', 'masakazu.yonekura@gmail.com')
   s.developer('ser1zw', 'azariahsawtikes@gmail.com')
@@ -28,7 +30,7 @@ hoespec = Hoe.spec 'ruby-opencv' do |s|
   s.spec_extras = { :extensions => ['ext/opencv/extconf.rb'] }
 
   s.test_globs = ['test/test_*.rb']
-  s.urls = ['https://github.com/ruby-opencv/ruby-opencv/']
+  s.urls = { 'home' => 'https://github.com/ruby-opencv/ruby-opencv/' }
 
   s.extra_dev_deps << ['rake-compiler', '~> 0'] << ['hoe-gemspec', '~> 0']
 
@@ -47,7 +49,8 @@ task 'gem:precompile' => ['gem'] do
   gemfile = Dir.glob("pkg/*.gem")[0]
   target_dir = File.join(tmp_dir, File.basename(gemfile, '.gem'))
 
-  installer = Gem::Installer.new(gemfile)
+  package = Gem::Package.new(gemfile)
+  installer = Gem::Installer.new(package)
   installer.unpack(target_dir)
 
   gemspec = installer.spec
@@ -69,7 +72,7 @@ task 'gem:precompile' => ['gem'] do
 
     make_cmd = (`#{ruby} -e "print RUBY_PLATFORM"` =~ /mswin/) ? 'nmake' : 'make'
     Dir.chdir(target_dir) {
-      cmd = [ruby, extension, *args].join(' ')
+      cmd = [ruby, extension, *args]
       results = []
       Gem::Ext::ExtConfBuilder.run(cmd, results)
       Gem::Ext::ExtConfBuilder.make('', results)
@@ -96,4 +99,3 @@ YARD::Rake::YardocTask.new do |t|
 end
 
 # vim: syntax=ruby
-

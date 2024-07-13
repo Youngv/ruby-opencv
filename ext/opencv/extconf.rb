@@ -60,8 +60,10 @@ opencv_libraries_opt.each { |lib| warn "#{lib} not found." unless have_library(l
 
 # Check the required headers
 puts ">> Check the required headers..."
-opencv_headers.each { |header| raise "#{header} not found." unless have_header(header) }
-opencv_headers_opt.each { |header| warn "#{header} not found." unless have_header(header) }
+with_cflags("-x c++") do
+  opencv_headers.each { |header| raise "#{header} not found." unless have_header(header) }
+  opencv_headers_opt.each { |header| warn "#{header} not found." unless have_header(header) }
+end
 have_header("stdarg.h")
 
 if $warnflags
@@ -74,4 +76,3 @@ $CFLAGS << " -I#{File.dirname(__FILE__)}/ext/opencv"
 
 # Create Makefile
 create_makefile('opencv')
-
